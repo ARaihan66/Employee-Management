@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import EmployeeModal from "./components/EmployeeModal";
+import EmployeeTable from "./components/EmployeeTable";
 
 export const backendUrl = "http://localhost:5000/api/employee";
 
@@ -31,7 +33,11 @@ function App() {
 
   return (
     <>
-      <h1>Hello World</h1>
+      <h1 className="text-xl font-semibold text-center mt-20">
+        Employee Management System
+      </h1>
+      <EmployeeModal />
+      <EmployeeTable data={data} />
     </>
   );
 }
