@@ -1,5 +1,10 @@
 import { TiEdit } from "react-icons/ti";
 import { MdDelete } from "react-icons/md";
+import EmployeeModal from "./EmployeeModal";
+import { useMutation } from "@tanstack/react-query";
+import { backendUrl } from "../App";
+import toast from "react-hot-toast";
+import { queryClient } from "../utils/queryClient";
 
 interface Employee {
   id: number;
@@ -17,8 +22,35 @@ interface EmployeeProps {
 }
 
 const EmployeeTable = ({ data }: EmployeeProps) => {
+  if (data?.employee?.length === 0) {
+    return <div>No employee data available</div>;
+  }
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await fetch(`${backendUrl}/${id}`, {
+        method: "DELETE",
+        headers: { "content-type": "application/json" },
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.error ?? "Failed to delete employee");
+      }
+
+      return result;
+    },
+
+    onSuccess: () => {
+      toast.success("Employee deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["employee_details"] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-x-auto px-10">
       <div className="min-w-225 bg-gray-50 rounded-xl p-6">
         <table className="w-full">
           <thead>
@@ -47,11 +79,16 @@ const EmployeeTable = ({ data }: EmployeeProps) => {
                     <td className="p-4">{item.role}</td>
                     <td className="p-4">{item.salary}</td>
                     <td className="p-4">
-                      <div className="flex justify-start gap-4">
-                        <button className="bg-gray-200 p-2 rounded-full text-lg transition hover:bg-white cursor-pointer">
-                          <TiEdit />
-                        </button>
-                        <button className="bg-gray-200 p-2 text-red-600 rounded-full text-lg transition hover:bg-white cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        <EmployeeModal data={item} type="update">
+                          <button className="bg-gray-200 p-2 rounded-full text-lg transition hover:bg-white cursor-pointer">
+                            <TiEdit />
+                          </button>
+                        </EmployeeModal>
+                        <button
+                          onClick={() => deleteMutation.mutate(item.id)}
+                          className="bg-gray-200 p-2 text-red-600 rounded-full text-lg transition hover:bg-white cursor-pointer"
+                        >
                           <MdDelete />
                         </button>
                       </div>

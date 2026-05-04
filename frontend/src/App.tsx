@@ -29,14 +29,16 @@ function App() {
     return <div>{error.message}</div>;
   }
 
-  console.log(data);
-
   return (
     <>
       <h1 className="text-xl font-semibold text-center mt-20">
         Employee Management System
       </h1>
-      <EmployeeModal />
+      <EmployeeModal type="add">
+        <button className="px-5 py-2 rounded-2xl bg-gray-300 cursor-pointer">
+          Add Employee
+        </button>
+      </EmployeeModal>
       <EmployeeTable data={data} />
     </>
   );
